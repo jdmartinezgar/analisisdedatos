@@ -1,0 +1,24 @@
+import pandas as pd
+
+# Leer los datos en un dataframe
+df = pd.read_csv("data.csv")
+
+# Verificar si hay valores faltantes en los datos
+missing_values = df.isnull().sum()
+
+# Eliminar las columnas con una alta cantidad de valores faltantes
+df = df.dropna(thresh=len(df) * 0.8, axis=1)
+
+# Reemplazar los valores faltantes en las columnas restantes
+df = df.fillna(df.mean())
+
+# Codificar variables categóricas en variables numéricas
+df = pd.get_dummies(df, columns=["categorical_variable"])
+
+# Normalizar las columnas numéricas para que tengan una escala similar
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+df[["numerical_variable"]] = scaler.fit_transform(df[["numerical_variable"]])
+
+# Guardar los datos preprocesados en un archivo csv
+df.to_csv("preprocessed_data.csv", index=False)
