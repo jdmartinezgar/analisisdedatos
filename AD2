@@ -1,0 +1,28 @@
+"""arbol de decisiones"""
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# Carga de datos a partir de un archivo csv
+datos = pd.read_csv("datos2.csv")
+
+# Divide los datos en dos partes: una para entrenar el modelo y otra para evaluar su precisión
+entrenamiento, prueba, \
+etiquetas_entrenamiento, etiquetas_prueba = train_test_split(
+    datos.iloc[:,:-1],
+    datos.iloc[:,-1],
+    test_size=0.3
+)
+
+
+# Creación del modelo de árbol de decisiones
+modelo = DecisionTreeClassifier()
+modelo.fit(entrenamiento, etiquetas_entrenamiento)
+
+# Realización de predicciones con los datos de prueba
+predicciones = modelo.predict(prueba)
+
+# Evaluación de la precisión del modelo
+precision = accuracy_score(etiquetas_prueba, predicciones)
+print(f"Precision del modelo: {precision*100:.2f}%")
