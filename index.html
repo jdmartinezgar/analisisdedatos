@@ -1,77 +1,74 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<title>Resultados de la proyección de headcount</title>
-	<!-- Incluye la librería D3.js -->
-	<script src="https://d3js.org/d3.v5.min.js"></script>
-	<style>
-		/* Estilo para la tabla */
-		table {
-		  border-collapse: collapse;
-		  margin: 20px;
-		}
+  <head>
+    <title>Resultados de proyección de headcount</title>
+  </head>
+  <body>
+    <h1>Resultados de proyección de headcount</h1>
+    
+    <h2>Gráfica</h2>
+    <div id="plot"></div>
 
-		th, td {
-		  text-align: center;
-		  padding: 8px;
-		  border-bottom: 1px solid #ddd;
-		}
+    <h2>Tabla</h2>
+    <div id="table"></div>
 
-		th {
-		  background-color: #4CAF50;
-		  color: white;
-		}
-	</style>
-</head>
-<body>
-	<!-- Crear un contenedor para el gráfico -->
-	<div id="grafico"></div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(function() {
+        $.get('resultados.csv', function(data) {
+          var cluster = [];
+          var rotacion_promedio = [];
+          var headcount_2023 = [];
+          var headcount_2024 = [];
 
-	<!-- Crear una tabla para mostrar los resultados -->
-	<table>
-		<thead>
-			<tr>
-				<th>Cluster</th>
-				<th>Rotación promedio</th>
-				<th>Headcount proyectado para 2023</th>
-				<th>Headcount proyectado para 2024</th>
-			</tr>
-		</thead>
-		<tbody>
-		</tbody>
-	</table>
+          var rows = data.split('\n');
+          for (var i = 1; i < rows.length; i++) {
+            var cells = rows[i].split(',');
+            if (cells.length > 1) {
+              cluster.push(cells[0]);
+              rotacion_promedio.push(cells[1]);
+              headcount_2023.push(cells[2]);
+              headcount_2024.push(cells[3]);
+            }
+          }
 
-	<script>
-		// Cargar los datos del archivo CSV
-		d3.csv("resultados.csv").then(function(data) {
-			// Crear una escala para el eje y del gráfico
-			var yScale = d3.scaleLinear()
-				.domain([0, d3.max(data, function(d) { return +d.headcount_2024; })])
-				.range([0, 400]);
+          var trace1 = {
+            x: cluster,
+            y: headcount_2023,
+            name: 'Headcount 2023',
+            type: 'bar'
+          };
 
-			// Seleccionar el contenedor del gráfico y crear un elemento SVG
-			var svg = d3.select("#grafico")
-				.append("svg")
-				.attr("width", 400)
-				.attr("height", 400);
+          var trace2 = {
+            x: cluster,
+            y: headcount_2024,
+            name: 'Headcount 2024',
+            type: 'bar'
+          };
 
-			// Crear rectángulos para cada barra del gráfico
-			var bars = svg.selectAll("rect")
-				.data(data)
-				.enter()
-				.append("rect")
-				.attr("x", function(d, i) { return i * 80; })
-				.attr("y", function(d) { return 400 - yScale(d.headcount_2024); })
-				.attr("width", 50)
-				.attr("height", function(d) { return yScale(d.headcount_2024); })
-				.attr("fill", "steelblue");
+          var layout = {
+            title: 'Proyección de headcount por cluster',
+            xaxis: {
+              title: 'Cluster'
+            },
+            yaxis: {
+              title: 'Headcount'
+            }
+          };
 
-			// Añadir texto a cada rectángulo
-			var labels = svg.selectAll("text")
-				.data(data)
-				.enter()
-				.append("text")
-				.text(function(d) { return d.headcount_2024; })
-				.attr("x", function(d, i) { return i * 80 + 25; })
-				.attr("y", function(d) { return 400 - yScale(d.head
+          var data = [trace1, trace2];
+          Plotly.newPlot('plot', data, layout);
+
+          var table = '<table>';
+          table += '<tr><th>Cluster</th><th>Rotación promedio</th><th>Headcount 2023</th><th>Headcount 2024</th></tr>';
+          for (var i = 0; i < cluster.length; i++) {
+            table += '<tr><td>' + cluster[i] + '</td><td>' + rotacion_promedio[i] + '</td><td>' + headcount_2023[i] + '</td><td>' + headcount_2024[i] + '</td></tr>';
+          }
+          table += '</table>';
+          $('#table').html(table);
+        });
+      });
+    </script>
+  </body>
+</html>
