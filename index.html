@@ -1,20 +1,77 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Resultados</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.datatables.net/v/dt/dt-1.11.3/datatables.min.css"
-    />
-    <script src="https://cdn.datatables.net/v/dt/dt-1.11.3/datatables.min.js"></script>
-  </head>
-  <body>
-    <h1>Resultados</h1>
-    <div id="grafica"></div>
-    <table id="tabla"></table>
-    <script src="script.js"></script>
-  </body>
-</html>
+<head>
+	<meta charset="utf-8">
+	<title>Resultados de la proyección de headcount</title>
+	<!-- Incluye la librería D3.js -->
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+	<style>
+		/* Estilo para la tabla */
+		table {
+		  border-collapse: collapse;
+		  margin: 20px;
+		}
+
+		th, td {
+		  text-align: center;
+		  padding: 8px;
+		  border-bottom: 1px solid #ddd;
+		}
+
+		th {
+		  background-color: #4CAF50;
+		  color: white;
+		}
+	</style>
+</head>
+<body>
+	<!-- Crear un contenedor para el gráfico -->
+	<div id="grafico"></div>
+
+	<!-- Crear una tabla para mostrar los resultados -->
+	<table>
+		<thead>
+			<tr>
+				<th>Cluster</th>
+				<th>Rotación promedio</th>
+				<th>Headcount proyectado para 2023</th>
+				<th>Headcount proyectado para 2024</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+
+	<script>
+		// Cargar los datos del archivo CSV
+		d3.csv("resultados.csv").then(function(data) {
+			// Crear una escala para el eje y del gráfico
+			var yScale = d3.scaleLinear()
+				.domain([0, d3.max(data, function(d) { return +d.headcount_2024; })])
+				.range([0, 400]);
+
+			// Seleccionar el contenedor del gráfico y crear un elemento SVG
+			var svg = d3.select("#grafico")
+				.append("svg")
+				.attr("width", 400)
+				.attr("height", 400);
+
+			// Crear rectángulos para cada barra del gráfico
+			var bars = svg.selectAll("rect")
+				.data(data)
+				.enter()
+				.append("rect")
+				.attr("x", function(d, i) { return i * 80; })
+				.attr("y", function(d) { return 400 - yScale(d.headcount_2024); })
+				.attr("width", 50)
+				.attr("height", function(d) { return yScale(d.headcount_2024); })
+				.attr("fill", "steelblue");
+
+			// Añadir texto a cada rectángulo
+			var labels = svg.selectAll("text")
+				.data(data)
+				.enter()
+				.append("text")
+				.text(function(d) { return d.headcount_2024; })
+				.attr("x", function(d, i) { return i * 80 + 25; })
+				.attr("y", function(d) { return 400 - yScale(d.head
